@@ -16,6 +16,11 @@ You will need a couple of RubyGems to run SimplisticNotes:
 * sinatra
 * json
 
+To run the tests you will also need:
+
+* rake
+* rack-test
+
 These can be installed as follows:
 
     gem install sinatra json
@@ -46,3 +51,7 @@ SimplisticNotes includes a small test suite. This can be run using the test
 rake task:
 
     rake test
+
+The test suite has been tested on the following platforms:
+
+* Mac OS X 10.6 Ruby MRI 1.9.1
