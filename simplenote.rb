@@ -46,10 +46,10 @@ module Simplenote
         end
       end
 
-      def filtered_params
+      def filter_note(note)
         filtered = {}
         %w[content deleted modifydate createdate systemtags tags].each do |key|
-          filtered[key] = params[key] if params.has_key?(key)
+          filtered[key] = note[key] if note.has_key?(key)
         end
         filtered
       end
@@ -71,7 +71,7 @@ module Simplenote
       check_authorization
 
       key = UUID.generate
-      note = {
+      defaults = {
         'key' => key,
         'version' => 1,
         'syncnumber' => 1,
@@ -81,10 +81,11 @@ module Simplenote
         'createdate' => Time.now.to_f.to_s,
         'tags' => [],
         'systemtags' => []
-      }.merge(JSON.parse request.body.read).to_json # TODO: filter this
+      }
+      note = filter_note(JSON.parse request.body.read)
+      note = defaults.merge(note).to_json
 
       set_note key, note
-      #notes[key] = note
       note
     end
 
@@ -97,6 +98,24 @@ module Simplenote
       halt 404 if note.nil?
 
       note.to_json
+    end
+
+    # Update note
+    post '/api2/data/:key' do |key|
+      content_type :json
+      check_authorization
+
+      note = get_note key
+      halt 404 if note.nil?
+
+      note.merge! filter_note(JSON.parse request.body.read)
+      note['version'] += 1
+      note['syncnumber'] += 1
+
+      # TODO: Exclude content if it hasn't changed
+      note = note.to_json
+      set_note note['key'], note
+      note
     end
 
   end
