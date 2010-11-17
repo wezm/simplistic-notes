@@ -67,7 +67,7 @@ module Simplenote
 
     # Create note
     post '/api2/data' do
-      content_type('application/json')
+      content_type :json
       check_authorization
 
       key = UUID.generate
@@ -87,5 +87,17 @@ module Simplenote
       #notes[key] = note
       note
     end
+
+    # Get note
+    get '/api2/data/:key' do |key|
+      content_type :json
+      check_authorization
+
+      note = get_note key
+      halt 404 if note.nil?
+
+      note.to_json
+    end
+
   end
 end

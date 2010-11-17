@@ -49,7 +49,7 @@ class SimplenoteTest < Test::Unit::TestCase
     }
     post auth('/api2/data'), {}, {:input => note.to_json}
     assert last_response.ok?, "response is ok"
-    
+
     new_note = JSON.parse(last_response.body)
     assert_equal 'Test Note', new_note['content']
     assert_equal '1283689511.529748', new_note['createdate']
@@ -61,6 +61,28 @@ class SimplenoteTest < Test::Unit::TestCase
     assert new_note.has_key?('key'), "key is set"
     assert new_note['tags'].empty?, 'tags is empty'
     assert new_note['systemtags'].empty?, 'tags is empty'
+  end
+
+  def test_note_bad_auth
+    get '/api2/data/note-key'
+    assert last_response.status == 401
+  end
+
+  def test_note_not_found
+    get auth('/api2/data/not-found')
+    assert last_response.status == 404
+  end
+
+  def test_get_note
+    # Create a note
+    post auth('/api2/data'), {}, {:input => { 'content' => 'Test Note' }.to_json}
+    note = JSON.parse(last_response.body)
+
+    # Retrieve the note
+    get auth("/api2/data/#{note['key']}")
+    fetched_note = JSON.parse(last_response.body)
+    assert last_response.ok?, "response is ok"
+    assert_equal note, fetched_note
   end
 
 end
